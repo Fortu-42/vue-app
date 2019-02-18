@@ -134,74 +134,63 @@ export default {
       this.errorMsg = "";
       this.showForgotPassword = !this.showForgotPassword;
     },
-    login() {
+    async login() {
       this.performingRequest = true;
-      fb.auth
-        .signInWithEmailAndPassword(
+      try {
+        const user = await fb.auth.signInWithEmailAndPassword(
           this.loginForm.email,
           this.loginForm.password
-        )
-        .then(user => {
-          this.$store.commit("setCurrentUser", user.user);
-          this.$store.dispatch("fetchUserProfile");
-          this.performingRequest = false;
-          this.$router.push("/dashboard");
-        })
-        .catch(err => {
-          console.log(err);
-          this.performingRequest = false;
-          this.errorMsg = err.message;
-        });
+        );
+        this.$store.commit("setCurrentUser", user.user);
+        this.$store.dispatch("fetchUserProfile");
+        this.performingRequest = false;
+        this.$router.push("/dashboard");
+      } catch (err) {
+        console.log(err);
+        this.performingRequest = false;
+        this.errorMsg = err.message;
+      }
     },
-    signup() {
-      this.performingRequest = true;
+    async signup() {
+      try {
+        this.performingRequest = true;
 
-      fb.auth
-        .createUserWithEmailAndPassword(
+        const user = await fb.auth.createUserWithEmailAndPassword(
           this.signupForm.email,
           this.signupForm.password
-        )
-        .then(user => {
-          console.log(user);
+        );
 
-          this.$store.commit("setCurrentUser", user.user);
+        this.$store.commit("setCurrentUser", user.user);
 
-          // create user obj
-          fb.usersCollection
-            .doc(user.user.uid)
-            .set({
-              name: this.signupForm.name,
-              title: this.signupForm.title
-            })
-            .then(() => {
-              this.$store.dispatch("fetchUserProfile");
-              this.performingRequest = false;
-              this.$router.push("/dashboard");
-            })
-            .catch(err => {
-              console.log(err);
-              this.performingRequest = false;
-            });
-        })
-        .catch(err => {
-          console.log(err);
+        // create user obj
+        await fb.usersCollection.doc(user.user.uid).set({
+          name: this.signupForm.name,
+          title: this.signupForm.title
         });
+
+        this.$store.dispatch("fetchUserProfile");
+        this.performingRequest = false;
+        this.$router.push("/dashboard");
+      } catch (err) {
+        console.log(err);
+        this.performingRequest = false;
+        this.errorMsg = err.message;
+      }
     },
-    resetPassword() {
-      this.performingRequest = true;
+    async resetPassword() {
+      try {
+        this.performingRequest = true;
 
-      fb.auth
-        .sendPasswordResetEmail(this.passwordForm.email)
-        .then(() => {
-          this.performingRequest = false;
-          this.passwordResetSuccess = true;
-          this.passwordForm.email = "";
-        })
-        .catch(err => {
-          console.log(err);
-          this.performingRequest = false;
-          this.errorMsg = err.message;
-        });
+        await fb.auth.sendPasswordResetEmail(this.passwordForm.email);
+
+        this.performingRequest = false;
+        this.passwordResetSuccess = true;
+        this.passwordForm.email = "";
+      } catch (err) {
+        console.log(err);
+        this.performingRequest = false;
+        this.errorMsg = err.message;
+      }
     }
   }
 };
