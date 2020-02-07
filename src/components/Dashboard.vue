@@ -34,7 +34,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(["userProfile"])
+    ...mapState(["userProfile", "currentUser"])
   },
   methods: {
     createPost() {
@@ -43,7 +43,7 @@ export default {
           createdOn: new Date(),
           content: this.post.content,
           userId: this.currentUser.uid,
-          userName: this.currentUser.name,
+          userName: this.userProfile.name,
           comments: 0,
           likes: 0
         })

@@ -8,6 +8,10 @@ fb.auth.onAuthStateChanged(user => {
   if (user) {
     store.commit("setCurrentUser", user);
     store.dispatch("fetchUserProfile");
+
+    fb.postsCollection
+      .orderBy("createdOn", "desc")
+      .onSnapshot(querySnapshot => {});
   }
 });
 
